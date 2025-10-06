@@ -8,9 +8,11 @@ const initialState = {
     loading : false
 }
 
-export const getProducts = createAsyncThunk("getProducts",async({rejectWithValue})=>{
+export const getProducts = createAsyncThunk("getProducts",async(_,{rejectWithValue})=>{
     try {
         const response = await axios.get(`${api}/products`);
+
+        console.log(response.data)
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response?.data || error.message)
@@ -19,7 +21,6 @@ export const getProducts = createAsyncThunk("getProducts",async({rejectWithValue
 export const productSlice = createSlice({
     name : "products",
     initialState,
-
     reducers :{},
 
     extraReducers:(builder)=>{
@@ -33,7 +34,7 @@ export const productSlice = createSlice({
         })
         .addCase(getProducts.rejected, (state,action)=>{
             state.loading = false;
-            state.products = action.payload;
+            state.error = action.payload;
         })
     }
 })

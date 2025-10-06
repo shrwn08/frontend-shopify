@@ -1,9 +1,9 @@
+import ProductList from "./components/productList";
 import "./App.css";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+
 
 function App() {
-  return <Login />;
+  return <ProductList />;
 }
 
 export default App;
