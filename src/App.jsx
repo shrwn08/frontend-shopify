@@ -1,10 +1,11 @@
 
 import './App.css'
+import Register from './pages/Register'
 
 function App() {
 
   return (
-   <>Hello Shopify...</>
+  <Register />
   )
 }
 
