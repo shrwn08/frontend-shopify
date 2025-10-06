@@ -1,0 +1,17 @@
+1. Primary Colors (Brand & Trust)
+
+Deep Blue (#1E3A8A) – conveys trust, security, and professionalism. Great for headers, navigation, or buttons.
+
+White (#FFFFFF) – keeps the design clean, readable, and modern.
+
+2. Accent Colors (Call-to-Action & Highlights)
+
+Vibrant Orange (#F97316) – draws attention to “Add to Cart”, “Buy Now”, and promotional banners.
+
+Bright Yellow (#FACC15) – for highlights, badges, or discount labels.
+
+3. Neutral Colors (Background & Text)
+
+Light Gray (#F3F4F6) – for background sections, cards, or subtle separation of elements.
+
+Dark Gray (#111827) – for primary text, product descriptions, and headings.

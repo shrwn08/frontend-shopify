@@ -43,59 +43,65 @@ const Register = () => {
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username :</label>
+    <section className="w-full h-full bg-white flex justify-center items-center relative">
+      <form onSubmit={handleSubmit} className="w-80 h-96 bg-[#FEB21A] rounded-md sm:hidden">
+        <h2 className="text-center text-3xl font-bold mt-3">Register </h2>
+        <div className="w-[95%] flex gap-4 justify-between items-center mt-3">
+          <label className="text-xl">Username </label>
           <input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleFormDataOnchange}
+            className="h-10 border rounded-md px-2"
           />
         </div>
-        <div>
-          <label>Email :</label>
+        <div className="w-[95%] flex gap-4 justify-between items-center mt-3">
+          <label className="text-xl">Email </label>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleFormDataOnchange}
+            className="h-10 border rounded-md px-2"
           />
         </div>
-        <div>
-          <label>Password :</label>
+        <div className="w-[95%] flex gap-4 justify-between items-center mt-3 relative">
+          <label className="text-xl">Password </label>
           <input
             type={visiblePass ? "text" : "password"}
             name="password"
             value={formData.password}
             onChange={handleFormDataOnchange}
+            className="h-10 border rounded-md px-2"
           />
 
-          <button type="button" onClick={handleVisiblePassword}>
+          <button type="button" onClick={handleVisiblePassword} className="absolute right-2">
             {visiblePass ? <FaEyeSlash /> : <FaEye />}
           </button>
         </div>
-        <div>
-          <label>Re-Password :</label>
+        <div className="w-[95%] flex gap-4 justify-between items-center mt-3 relative">
+          <label className="text-xl">Re-Pass </label>
           <input
             type={visibleRepass ? "text" : "password"}
             onChange={(e) => setRepassword(e.target.value)}
             value={repassword}
+            className="h-10 border rounded-md px-2"
           />
-          <button type="button" onClick={hanldeVisibleRepassword}>
+          <button type="button" onClick={hanldeVisibleRepassword} className="absolute right-2">
             {visibleRepass ? <FaEyeSlash /> : <FaEye />}{" "}
           </button>
         </div>
-        <div>
+        <div className="w-[95%] flex gap-4 justify-between items-center mt-3">
           <input
             type="submit"
             value="Register"
-            className="hover:cursor-pointer"
+            className="w-full hover:cursor-pointer text-xl"
           />
         </div>
       </form>
-    </>
+      
+    </section>
   );
 };
 

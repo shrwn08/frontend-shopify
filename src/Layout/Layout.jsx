@@ -5,7 +5,7 @@ import Footer from '../components/Footer'
 
 const Layout = () => {
   return (
-    <div>
+    <div className='max-w-screen min-h-screen overflow-hidden bg-[#FFFFFF] flex flex-col justify-between items-center'>
         <Header />
         <Outlet />
         <Footer />
