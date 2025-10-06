@@ -15,9 +15,20 @@ export const getProducts = createAsyncThunk("getProducts",async(_,{rejectWithVal
         console.log(response.data)
         return response.data;
     } catch (error) {
-        return rejectWithValue(error.response?.data || error.message)
+        return rejectWithValue(error.response?.data || error.message);
     }
+});
+
+export const getProductDetails = createAsyncThunk("getProductDetails",async({id},{rejectWithValue})=>{
+    try {
+        const response = await axios.get(`${api}/product/${id}`);
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+
 })
+
 export const productSlice = createSlice({
     name : "products",
     initialState,
