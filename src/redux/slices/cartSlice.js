@@ -18,7 +18,31 @@ const getCartItems = createAsyncThunk("getCartItems", async(_,{rejectWithValue})
     }
 });
 
+const increaseQuantityItem = createAsyncThunk("increaseQuantityItem", async(id,{rejectWithValue})=>{
+    try {
+        const response = await axios.put(`${api}/increase_quantity`,{id},{
+            headers : {
+                "Content-Type" : "application/json"
+            }
+        });
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+})
 
+const decreaseQuantityItem = createAsyncThunk("decreaseQuantityItem", async(id,{rejectWithValue})=>{
+    try {
+        const response = await axios.put(`${api}/decrease_quantity`,{id},{
+            headers : {
+                "Content-Type" : "application/json"
+            }
+        });
+        return response.data;
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+})
 
 
 
@@ -41,6 +65,32 @@ const cartSlice=createSlice({
         .addCase(getCartItems.rejected, (state,action)=>{
             state.error = action.payload;
             state.loading = false;
+        });
+
+        builder.addCase(increaseQuantityItem.pending, (state)=>{
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(increaseQuantityItem.fulfilled, (state,action)=>{
+            state.loading = false;
+            state.cart = action.payload;
+        })
+        .addCase(increaseQuantityItem.rejected, (state,action)=>{
+            state.error = action.payload;
+            state.loading = false;
+        });
+
+        builder.addCase(decreaseQuantityItem.pending, (state)=>{
+            state.error = null;
+            state.loading = true;
+        })
+        .addCase(decreaseQuantityItem.fulfilled, (state,action)=>{
+            state.cart = action.payload;
+            state.loading = false;
+        })
+        .addCase(decreaseQuantityItem.rejected, (state,action)=>{
+            state.loading = false;
+            state.error = action.payload;
         })
     }
 })
