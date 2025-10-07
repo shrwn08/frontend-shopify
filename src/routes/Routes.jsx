@@ -5,7 +5,7 @@ import Layout from "../Layout/Layout.jsx";
 
 const Login = lazy(() => import("../pages/Login.jsx"));
 const Register = lazy(() => import("../pages/Register.jsx"));
-const ProductList = lazy(() => import("../pages/ProductList.jsx"));
+const ProductList = lazy(()=>import("../pages/ProductList.jsx"))
 const ProductDetails = lazy(() => import("../pages/ProductDetails.jsx"));
 
 const router = createBrowserRouter([
