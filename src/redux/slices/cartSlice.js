@@ -16,7 +16,11 @@ const getCartItems = createAsyncThunk("getCartItems", async(_,{rejectWithValue})
     } catch (error) {
         return rejectWithValue(error.response?.data || error.message);
     }
-})
+});
+
+
+
+
 
 
 const cartSlice=createSlice({
