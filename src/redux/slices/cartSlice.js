@@ -18,6 +18,16 @@ const getCartItems = createAsyncThunk("getCartItems", async(_,{rejectWithValue})
     }
 });
 
+const addingToCart = createAsyncThunk("addingToCart", async(id,{rejectWithValue})=>{
+    try {
+        const response = await axios.post(`${api}/add_to_cart`);
+        return response.data
+
+    } catch (error) {
+        return rejectWithValue(error.response?.data || error.message);
+    }
+})
+
 const increaseQuantityItem = createAsyncThunk("increaseQuantityItem", async(id,{rejectWithValue})=>{
     try {
         const response = await axios.put(`${api}/increase_quantity`,{id},{
@@ -54,6 +64,7 @@ const cartSlice=createSlice({
 
     },
     extraReducers :(builder)=>{
+        //getCartItems
         builder.addCase(getCartItems.pending,(state)=>{
             state.error = null;
             state.loading = true;
@@ -66,7 +77,20 @@ const cartSlice=createSlice({
             state.error = action.payload;
             state.loading = false;
         });
+        //addingToCart
+        builder.addCase(addingToCart.pending, (state)=>{
+            state.loading = true;
+                state.error = null;
+        })
+        .addCase(addingToCart.fulfilled, (state,action)=>{
+             state.loading = false;
+            state.cart = action.payload;
+        })
+        .addCase(addingToCart.rejected, (state,action)=>{
+            state.error = action.payload;
+        })
 
+        //increaseQuantityItem
         builder.addCase(increaseQuantityItem.pending, (state)=>{
             state.loading = true;
             state.error = null;
@@ -79,7 +103,7 @@ const cartSlice=createSlice({
             state.error = action.payload;
             state.loading = false;
         });
-
+           /// decreaseQuantityItem
         builder.addCase(decreaseQuantityItem.pending, (state)=>{
             state.error = null;
             state.loading = true;
