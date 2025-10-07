@@ -18,28 +18,37 @@ const Hero = () => {
   }, []);
 
   return (
-    <section className="w-full h-[70vh] flex justify-center items-center relative overflow-hidden">
-      {/* Hero Image */}
+    <section className="w-full h-[70vh] relative overflow-hidden">
+  {/* Slider Container */}
+  <div
+    className="flex h-full transition-transform duration-700 ease-in-out"
+    style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+  >
+    {hero_images.map((image, idx) => (
       <img
+        key={idx}
         loading="lazy"
-        src={hero_images[currentIndex]}
-        alt={`Hero ${currentIndex + 1}`}
-        className="w-full h-full object-cover transition-opacity duration-700 ease-in-out"
+        src={image}
+        alt={`Hero ${idx + 1}`}
+        className="w-full h-full object-cover flex-shrink-0"
       />
+    ))}
+  </div>
 
-      {/* Navigation Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-        {hero_images.map((_, idx) => (
-          <div
-            key={idx}
-            onClick={() => setCurrentIndex(idx)}
-            className={`cursor-pointer h-3 w-3 rounded-full transition-all duration-300 ${
-              currentIndex === idx ? "bg-white scale-125" : "bg-gray-400"
-            }`}
-          ></div>
-        ))}
-      </div>
-    </section>
+  {/* Navigation Dots */}
+  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+    {hero_images.map((_, idx) => (
+      <div
+        key={idx}
+        onClick={() => setCurrentIndex(idx)}
+        className={`cursor-pointer h-3 w-3 rounded-full transition-all duration-300 ${
+          currentIndex === idx ? "bg-white scale-125" : "bg-gray-400"
+        }`}
+      ></div>
+    ))}
+  </div>
+</section>
+
   );
 };
 

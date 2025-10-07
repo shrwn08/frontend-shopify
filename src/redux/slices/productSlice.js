@@ -4,6 +4,7 @@ import axios from "axios";
 
 const initialState = {
     products : [],
+    productDetails : null,
     error : null,
     loading : false
 }
@@ -20,6 +21,7 @@ export const getProducts = createAsyncThunk("getProducts",async(_,{rejectWithVal
 });
 
 export const getProductDetails = createAsyncThunk("getProductDetails",async({id},{rejectWithValue})=>{
+    console.log(id)
     try {
         const response = await axios.get(`${api}/product/${id}`);
         return response.data;
@@ -32,7 +34,18 @@ export const getProductDetails = createAsyncThunk("getProductDetails",async({id}
 export const productSlice = createSlice({
     name : "products",
     initialState,
-    reducers :{},
+    reducers :{
+        clearProducts : (state)=>{
+          state.products = [];
+          state.loading =false;
+          state.error = null
+        },
+         clearProductDetails : (state)=>{
+          state.productDetails = {};
+          state.loading =false;
+          state.error = null
+        },
+    },
 
     extraReducers:(builder)=>{
         builder.addCase(getProducts.pending, (state)=>{
@@ -46,8 +59,24 @@ export const productSlice = createSlice({
         .addCase(getProducts.rejected, (state,action)=>{
             state.loading = false;
             state.error = action.payload;
+        });
+
+        builder.addCase(getProductDetails.pending,(state)=>{
+            state.error = null;
+            state.loading = true;
+        }).
+        addCase(getProductDetails.fulfilled, (state, actions)=>{
+            state.loading = false;
+            state.productDetails = actions.payload;
         })
+        .addCase(getProductDetails.rejected, (state,action)=>{
+            state.error = action.payload;
+            state.loading = false;
+        })
+
     }
 })
+
+export const {clearProducts, clearProductDetails} = productSlice.actions;
 
 export default productSlice.reducer;

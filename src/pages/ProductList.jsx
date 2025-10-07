@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getProducts } from "../redux/slices/productSlice";
+import { clearProducts, getProducts } from "../redux/slices/productSlice";
 import { Link } from "react-router-dom";
 import Hero from "../components/Hero.jsx";
 
@@ -10,7 +10,11 @@ function ProductList() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getProducts());
+  dispatch(getProducts());
+    return ()=>(
+      dispatch(clearProducts)
+    );
+
   }, [dispatch]);
 
   if (loading) return <p>loading... </p>;
