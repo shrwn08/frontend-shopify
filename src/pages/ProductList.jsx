@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearProducts, getProducts } from "../redux/slices/productSlice";
 import { Link } from "react-router-dom";
 import Hero from "../components/Hero.jsx";
+import { addingToCart } from "../redux/slices/cartSlice.js";
 
 function ProductList() {
   const { products, loading, error } = useSelector((state) => state.products);
@@ -16,6 +17,11 @@ function ProductList() {
     );
 
   }, [dispatch]);
+
+
+  const handleAddToCartBtn = (id) =>{
+    dispatch(addingToCart({id}))
+  }
 
   if (loading) return <p>loading... </p>;
   if (error) return <p>{error.message}</p>;
@@ -76,7 +82,8 @@ function ProductList() {
           {/* Add to Cart Button */}
           <button
             type="button"
-            className="w-full mt-4 bg-[#2B6CB0] text-white font-semibold py-2 rounded-md hover:bg-[#1E3A8A] transition-colors duration-200 disabled:bg-gray-400"
+            onClick={()=>handleAddToCartBtn(product._id)}
+            className="w-full mt-4 bg-[#2B6CB0] text-white font-semibold py-2 rounded-md hover:bg-[#1E3A8A] transition-colors duration-200 disabled:bg-gray-400 hover:cursor-pointer"
             disabled={product.stock === 0}
           >
             {product.stock === 0 ? "Out of Stock" : "Add to Cart"}

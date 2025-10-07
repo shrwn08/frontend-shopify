@@ -5,11 +5,11 @@ import { api } from "../../config/config";
 const initialState = {
     cart : [],
     error : null,
-    loading : false
+    loading : false,
 
 }
 
-const getCartItems = createAsyncThunk("getCartItems", async(_,{rejectWithValue})=>{
+export const getCartItems = createAsyncThunk("getCartItems", async(_,{rejectWithValue})=>{
     try {
         const response = await axios.get(`${api}/cart`);
         return response.data;
@@ -18,9 +18,15 @@ const getCartItems = createAsyncThunk("getCartItems", async(_,{rejectWithValue})
     }
 });
 
-const addingToCart = createAsyncThunk("addingToCart", async(id,{rejectWithValue})=>{
+export const addingToCart = createAsyncThunk("addingToCart", async(id,{rejectWithValue})=>{
+     console.log(id);
     try {
-        const response = await axios.post(`${api}/add_to_cart`);
+        const response = await axios.post(`${api}/add_to_cart`,id,{
+            headers : {
+                "Content-Type" : "application/json"
+            }
+        });
+       
         return response.data
 
     } catch (error) {
@@ -28,7 +34,7 @@ const addingToCart = createAsyncThunk("addingToCart", async(id,{rejectWithValue}
     }
 })
 
-const increaseQuantityItem = createAsyncThunk("increaseQuantityItem", async(id,{rejectWithValue})=>{
+export const increaseQuantityItem = createAsyncThunk("increaseQuantityItem", async(id,{rejectWithValue})=>{
     try {
         const response = await axios.put(`${api}/increase_quantity`,{id},{
             headers : {
@@ -41,7 +47,7 @@ const increaseQuantityItem = createAsyncThunk("increaseQuantityItem", async(id,{
     }
 })
 
-const decreaseQuantityItem = createAsyncThunk("decreaseQuantityItem", async(id,{rejectWithValue})=>{
+export const decreaseQuantityItem = createAsyncThunk("decreaseQuantityItem", async(id,{rejectWithValue})=>{
     try {
         const response = await axios.put(`${api}/decrease_quantity`,{id},{
             headers : {

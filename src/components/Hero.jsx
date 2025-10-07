@@ -18,25 +18,30 @@ const Hero = () => {
   }, []);
 
   return (
-    <section className="w-full h-[70vh] relative overflow-hidden">
+<section className="w-full relative overflow-hidden">
   {/* Slider Container */}
   <div
-    className="flex h-full transition-transform duration-700 ease-in-out"
+    className="flex transition-transform duration-700 ease-in-out"
     style={{ transform: `translateX(-${currentIndex * 100}%)` }}
   >
     {hero_images.map((image, idx) => (
-      <img
+      <div
         key={idx}
-        loading="lazy"
-        src={image}
-        alt={`Hero ${idx + 1}`}
-        className="w-full h-full object-cover flex-shrink-0"
-      />
+        className="w-full flex-shrink-0 relative"
+        style={{ paddingTop: "56.25%" }} // 16:9 aspect ratio for responsiveness
+      >
+        <img
+          loading="lazy"
+          src={image}
+          alt={`Hero ${idx + 1}`}
+          className="absolute top-0 left-0 w-full h-full object-cover"
+        />
+      </div>
     ))}
   </div>
 
   {/* Navigation Dots */}
-  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 z-20">
     {hero_images.map((_, idx) => (
       <div
         key={idx}
@@ -48,6 +53,7 @@ const Hero = () => {
     ))}
   </div>
 </section>
+
 
   );
 };
