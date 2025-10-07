@@ -16,7 +16,7 @@ function ProductList() {
   if (loading) return <p>loading... </p>;
   if (error) return <p>{error.message}</p>;
 
-  console.log(products);
+ 
   return (
 <section className="w-full min-h-screen bg-[#F7FAFC] flex flex-col items-center">
   {/* --- Hero Section --- */}
