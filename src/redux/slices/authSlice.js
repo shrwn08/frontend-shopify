@@ -1,22 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
-import { api } from "../../config/config";
+import axiosInstance from "../../utils/axiosInstance";
 
 const token = localStorage.getItem("token");
 
 const initialState = {
-  token : token || null,
+  token: token || null,
   loading: false,
   error: null,
-  successMessage : null,
-  isAuthenticated : !!token,
+  successMessage: null,
+  isAuthenticated: !!token,
 };
 
 export const registerUser = createAsyncThunk(
   "registerUser",
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${api}/auth/register`, formData, {
+      const response = await axiosInstance.post(`/auth/register`, formData, {
         headers: {
           "content-type": "application/json",
         },
@@ -28,22 +27,30 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-export const loginUser = createAsyncThunk("loginUser", async (formData,{rejectWithValue})=>{
+export const loginUser = createAsyncThunk(
+  "loginUser",
+  async (formData, { rejectWithValue }) => {
     try {
-        const response = await axios.post(`${api}/auth/login`,formData,{
-            headers : {
-                "Content-Type" : "application/json"
-            }
-        });
+      const response = await axiosInstance.post(`/auth/login`, formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        const {token} = response.data;
+      const { token } = response.data;
 
-        localStorage.setItem("token",token);
-        return response.data;
+      localStorage.setItem("token", token);
+
+      axiosInstance.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${token}`;
+
+      return response.data;
     } catch (error) {
-        return rejectWithValue(error.response?.data || error.message); 
+      return rejectWithValue(error.response?.data || error.message);
     }
-})
+  }
+);
 
 const authSlice = createSlice({
   name: "user",
@@ -56,12 +63,13 @@ const authSlice = createSlice({
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     },
-    loadUserFromStorage : (state)=>{
+    loadUserFromStorage: (state) => {
       const token = localStorage.getItem("token");
-     
-      if(token ){
+
+      if (token) {
         state.token = token;
         state.isAuthenticated = true;
+         axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       }
     },
   },
@@ -70,6 +78,7 @@ const authSlice = createSlice({
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.successMessage = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
@@ -80,24 +89,24 @@ const authSlice = createSlice({
         state.error = action.payload;
       });
 
-      //login user
-      builder.addCase(loginUser.pending, (state)=>{
+    //login user
+    builder
+      .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
-        
       })
-      .addCase(loginUser.fulfilled,(state,action)=>{
+      .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.token = action.payload.token;
         state.isAuthenticated = true;
         state.successMessage = action.payload.message;
       })
-      .addCase(loginUser.rejected, (state,action)=>{
+      .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
+      });
   },
 });
 
-export const { logout,loadUserFromStorage } = authSlice.actions;
+export const { logout, loadUserFromStorage } = authSlice.actions;
 export default authSlice.reducer;

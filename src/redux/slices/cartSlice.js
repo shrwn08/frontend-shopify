@@ -1,6 +1,5 @@
 import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { api } from "../../config/config";
+import axiosInstance from "../../utils/axiosInstance";
 
 const initialState = {
     cart : [],
@@ -11,21 +10,17 @@ const initialState = {
 
 export const getCartItems = createAsyncThunk("getCartItems", async(_,{rejectWithValue})=>{
     try {
-        const response = await axios.get(`${api}/cart`);
+        const response = await axiosInstance.get("/cart");
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response?.data || error.message);
     }
 });
 
-export const addingToCart = createAsyncThunk("addingToCart", async(id,{rejectWithValue})=>{
-     console.log(id);
+export const addingToCart = createAsyncThunk("addingToCart", async({productId,quantity},{rejectWithValue})=>{
+     console.log(productId,quantity);
     try {
-        const response = await axios.post(`${api}/add_to_cart`,id,{
-            headers : {
-                "Content-Type" : "application/json"
-            }
-        });
+        const response = await axiosInstance.post("/add_to_cart",{productId,quantity});
        
         return response.data
 
@@ -36,7 +31,7 @@ export const addingToCart = createAsyncThunk("addingToCart", async(id,{rejectWit
 
 export const increaseQuantityItem = createAsyncThunk("increaseQuantityItem", async(id,{rejectWithValue})=>{
     try {
-        const response = await axios.put(`${api}/increase_quantity`,{id},{
+        const response = await axiosInstance.put(`/increase_quantity`,{id},{
             headers : {
                 "Content-Type" : "application/json"
             }
@@ -49,7 +44,7 @@ export const increaseQuantityItem = createAsyncThunk("increaseQuantityItem", asy
 
 export const decreaseQuantityItem = createAsyncThunk("decreaseQuantityItem", async(id,{rejectWithValue})=>{
     try {
-        const response = await axios.put(`${api}/decrease_quantity`,{id},{
+        const response = await axiosInstance.put(`/decrease_quantity`,{id},{
             headers : {
                 "Content-Type" : "application/json"
             }

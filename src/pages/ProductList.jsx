@@ -13,14 +13,15 @@ function ProductList() {
   useEffect(() => {
   dispatch(getProducts());
     return ()=>(
-      dispatch(clearProducts)
+      dispatch(clearProducts())
     );
 
   }, [dispatch]);
 
 
   const handleAddToCartBtn = (id) =>{
-    dispatch(addingToCart({id}))
+    console.log(id)
+    dispatch(addingToCart({productId : id,quantity : 1}));
   }
 
   if (loading) return <p>loading... </p>;
