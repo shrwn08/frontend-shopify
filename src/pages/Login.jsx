@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../redux/slices/authSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [visiblePass, setVisiblePass] = useState(false);
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
 
@@ -26,8 +27,7 @@ const Login = () => {
 
     setPassword("");
     setUser("");
-
-    console.log("login successFul");
+    navigate("/");
   };
 
   return (

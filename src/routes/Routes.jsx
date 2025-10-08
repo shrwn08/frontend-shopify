@@ -7,6 +7,7 @@ const Login = lazy(() => import("../pages/Login.jsx"));
 const Register = lazy(() => import("../pages/Register.jsx"));
 const ProductList = lazy(()=>import("../pages/ProductList.jsx"))
 const ProductDetails = lazy(() => import("../pages/ProductDetails.jsx"));
+const Cart = lazy(()=>import("../pages/Cart.jsx"))
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
         path: "/product/:id",
         element: <ProductDetails />,
       },
+      {
+        path : "/cart",
+        element : <Cart />
+      }
     ],
   },
 ]);

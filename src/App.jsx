@@ -1,17 +1,20 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import "./App.css";
 import router from "./routes/Routes";
 import { RouterProvider } from "react-router-dom";
-import { Provider } from "react-redux";
-import { store } from "./redux/store.js";
+import { useDispatch } from "react-redux";
+import { loadUserFromStorage } from "./redux/slices/authSlice.js";
 
 function App() {
+  const dispatch = useDispatch();
+  useEffect(()=>{
+    dispatch(loadUserFromStorage());
+  },[dispatch])
   return (
-    <Provider store={store}>
+    
       <Suspense fallback={<div>Loading...</div>}>
         <RouterProvider router={router} />
       </Suspense>
-    </Provider>
   );
 }
 
