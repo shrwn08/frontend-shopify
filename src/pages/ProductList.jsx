@@ -1,4 +1,4 @@
-import React from "react";
+import React  from "react";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearProducts, getProducts } from "../redux/slices/productSlice";
@@ -20,8 +20,10 @@ function ProductList() {
 
 
   const handleAddToCartBtn = (id) =>{
-    console.log(id)
+   
+    
     dispatch(addingToCart({productId : id,quantity : 1}));
+ 
   }
 
   if (loading) return <p>loading... </p>;
@@ -81,7 +83,7 @@ function ProductList() {
           </div>
 
           {/* Add to Cart Button */}
-          <button
+        <button
             type="button"
             onClick={()=>handleAddToCartBtn(product._id)}
             className="w-full mt-4 bg-[#2B6CB0] text-white font-semibold py-2 rounded-md hover:bg-[#1E3A8A] transition-colors duration-200 disabled:bg-gray-400 hover:cursor-pointer"
@@ -89,6 +91,7 @@ function ProductList() {
           >
             {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
           </button>
+          
         </div>
       </div>
     ))}

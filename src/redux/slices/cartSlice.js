@@ -11,6 +11,7 @@ const initialState = {
 export const getCartItems = createAsyncThunk("getCartItems", async(_,{rejectWithValue})=>{
     try {
         const response = await axiosInstance.get("/cart");
+        console.log(response.data)
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response?.data || error.message);
