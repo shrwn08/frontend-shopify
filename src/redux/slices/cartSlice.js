@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../utils/axiosInstance";
+import reducer from "./authSlice";
 
 const initialState = {
   cart: [],
@@ -62,7 +63,7 @@ export const decreaseQuantityItem = createAsyncThunk(
   async ({ id }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.put(
-        `/decrease_quantity`,
+       "/decrease_quantity",
         { id },
         {
           headers: {
@@ -80,7 +81,21 @@ export const decreaseQuantityItem = createAsyncThunk(
 const cartSlice = createSlice({
   name: "cart",
   initialState,
-  reducers: {},
+  reducers: {
+    clearCartMessage: (state) => {
+      state.message = "";
+    },
+    clearCartError: (state) => {
+      state.error = null;
+    },
+     localUpdateQuantity: (state, action) => {
+      const { id, change } = action.payload;
+      const item = state.cart.find((i) => i._id === id);
+      if (item) {
+        item.quantity = Math.max(1, item.quantity + change);
+      }
+    },
+  },
   extraReducers: (builder) => {
     //getCartItems
     builder
@@ -121,13 +136,15 @@ const cartSlice = createSlice({
       })
       .addCase(increaseQuantityItem.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = state.cart.map((item) =>
-          item._id === action.payload._id ? action.payload : item
+        const updated = action.payload.data || action.payload;
+       state.cart = state.cart.map((item) =>
+          item._id === updated._id ? updated : item
         );
       })
       .addCase(increaseQuantityItem.rejected, (state, action) => {
         
         state.loading = false;
+        
         state.error =  state.error =
           typeof action.payload === "string"
             ? action.payload
@@ -155,5 +172,6 @@ const cartSlice = createSlice({
       });
   },
 });
-
+export const { clearCartMessage, clearCartError, localUpdateQuantity } =
+  cartSlice.actions;
 export default cartSlice.reducer;

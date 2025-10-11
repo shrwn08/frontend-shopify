@@ -4,6 +4,7 @@ import {
   decreaseQuantityItem,
   getCartItems,
   increaseQuantityItem,
+  localUpdateQuantity, 
 } from "../redux/slices/cartSlice";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
@@ -11,20 +12,13 @@ import { MdDelete } from "react-icons/md";
 const Cart = () => {
   const dispatch = useDispatch();
   const { cart, loading, error } = useSelector((state) => state.cart);
-  const [increaseQTY,setIncreaseQTY] = useState(false);
-  const [decreaseQTY, setDecreaseQTY] = useState(false);
-
-  useEffect(()=>{
-    dispatch(getCartItems());
-  },[dispatch])
+ 
 
   useEffect(() => {
-    if(increaseQTY || decreaseQTY){
-      dispatch(getCartItems());
-    }
-    setDecreaseQTY(false);
-    setIncreaseQTY(false);
-  }, [dispatch, setIncreaseQTY,setDecreaseQTY,increaseQTY, decreaseQTY]);
+    dispatch(getCartItems());
+  }, [dispatch]);
+
+  
 
   if (!cart || cart.length === 0)
     return (
@@ -36,17 +30,26 @@ const Cart = () => {
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   const handleQuantityIncrement = (id) => {
-    dispatch(increaseQuantityItem({ id }));
-    setIncreaseQTY(true);
+
+     dispatch(localUpdateQuantity({ id, change: +1 }));
+
+    const debouncing = () => {
+      setTimeout(() => {
+        dispatch(increaseQuantityItem({ id }));
+      }, 500);
+    };
+    debouncing();
   };
 
   const handleQuantityDecrement = (id) => {
-    dispatch(decreaseQuantityItem(id));
-    setDecreaseQTY(true);
+     dispatch(localUpdateQuantity({ id, change: -1 }));
+
+      setTimeout(() => {
+      dispatch(decreaseQuantityItem({ id }));
+    }, 400);
   };
 
   // Map structure from DB (productId contains details)
-  cart.forEach(element =>console.log( element._id));
 
   // const items = cart.map((item) => ({
   //   ...item.productId,
