@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   decreaseQuantityItem,
   getCartItems,
   increaseQuantityItem,
-  localUpdateQuantity, 
+  localUpdateQuantity,
+  removeProductFromCart, 
 } from "../redux/slices/cartSlice";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
@@ -36,7 +37,7 @@ const Cart = () => {
     const debouncing = () => {
       setTimeout(() => {
         dispatch(increaseQuantityItem({ id }));
-      }, 500);
+      }, 1000);
     };
     debouncing();
   };
@@ -46,9 +47,13 @@ const Cart = () => {
 
       setTimeout(() => {
       dispatch(decreaseQuantityItem({ id }));
-    }, 400);
+    }, 1000);
   };
 
+  function handleRemoveButton (id){
+    dispatch(removeProductFromCart({id}))
+dispatch(getCartItems());
+  }
   // Map structure from DB (productId contains details)
 
   // const items = cart.map((item) => ({
@@ -56,10 +61,9 @@ const Cart = () => {
   //   quantity: item.quantity,
   // }));
 
-  const total = cart.reduce(
-    (acc, item) => acc + item.productId.price * item.quantity,
-    0
-  );
+ const total = Array.isArray(cart)
+  ? cart.reduce((acc, item) => acc + item.productId.price * item.quantity, 0)
+  : 0;
 
   return (
     <section className="relative w-full min-h-screen flex flex-col md:flex-row justify-between bg-[#F7FAFC] py-10 px-4 md:px-10">
@@ -68,7 +72,7 @@ const Cart = () => {
         <h1 className="text-2xl font-bold text-[#2B6CB0] mb-6">Your Cart</h1>
 
         <div className="flex flex-col gap-6">
-          {cart.map((product) => (
+          {Array.isArray(cart) && cart.map((product) => (
             <div
               key={product._id}
               className="flex flex-col sm:flex-row items-center justify-between border-b pb-4"
@@ -120,6 +124,7 @@ const Cart = () => {
                   type="button"
                   className="h-10 w-20 mt-2 text-red-500 hover:text-red-700 transition"
                   title="Remove from cart"
+                  onClick={()=>handleRemoveButton(product._id)}
                 >
                   <MdDelete size={22} />
                 </button>

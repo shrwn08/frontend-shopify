@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../utils/axiosInstance";
-import reducer from "./authSlice";
 
 const initialState = {
   cart: [],
@@ -15,7 +14,7 @@ export const getCartItems = createAsyncThunk(
     try {
       const response = await axiosInstance.get("/cart");
       // console.log(response.data)
-      return response.data;
+      return Array.isArray(response.data) ? response.data : response.data.cartItems;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -63,7 +62,7 @@ export const decreaseQuantityItem = createAsyncThunk(
   async ({ id }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.put(
-       "/decrease_quantity",
+        "/decrease_quantity",
         { id },
         {
           headers: {
@@ -78,6 +77,19 @@ export const decreaseQuantityItem = createAsyncThunk(
   }
 );
 
+export const removeProductFromCart = createAsyncThunk(
+  "removeProductFromCart",
+  async ({id},{rejectWithValue}) => {
+    try {
+        const response = await axiosInstance.delete(`/add_to_cart/${id}`)
+        return response.data;
+    } catch (error) {
+
+        return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -88,7 +100,7 @@ const cartSlice = createSlice({
     clearCartError: (state) => {
       state.error = null;
     },
-     localUpdateQuantity: (state, action) => {
+    localUpdateQuantity: (state, action) => {
       const { id, change } = action.payload;
       const item = state.cart.find((i) => i._id === id);
       if (item) {
@@ -137,15 +149,14 @@ const cartSlice = createSlice({
       .addCase(increaseQuantityItem.fulfilled, (state, action) => {
         state.loading = false;
         const updated = action.payload.data || action.payload;
-       state.cart = state.cart.map((item) =>
+        state.cart = state.cart.map((item) =>
           item._id === updated._id ? updated : item
         );
       })
       .addCase(increaseQuantityItem.rejected, (state, action) => {
-        
         state.loading = false;
-        
-        state.error =  state.error =
+
+        state.error = state.error =
           typeof action.payload === "string"
             ? action.payload
             : action.payload?.error || "Failed to increase quantity";
@@ -158,18 +169,31 @@ const cartSlice = createSlice({
       })
       .addCase(decreaseQuantityItem.fulfilled, (state, action) => {
         state.loading = false;
-       state.cart = state.cart.map((item) =>
+        state.cart = state.cart.map((item) =>
           item._id === action.payload._id ? action.payload : item
         );
-        
       })
       .addCase(decreaseQuantityItem.rejected, (state, action) => {
         state.loading = false;
-         state.error =
+        state.error =
           typeof action.payload === "string"
             ? action.payload
             : action.payload?.error || "Failed to decrease quantity";
       });
+
+      //remove button functionality
+      builder.addCase(removeProductFromCart.pending, (state)=>{
+            state.loading = true;
+            state.error = null;
+      })
+      .addCase(removeProductFromCart.fulfilled, (state,action)=>{
+        state.loading = false;
+        state.cart = action.payload;
+      })
+      .addCase(removeProductFromCart.rejected,(state,action)=>{
+        state.loading = false;
+        state.error = action.payload;
+      })
   },
 });
 export const { clearCartMessage, clearCartError, localUpdateQuantity } =
