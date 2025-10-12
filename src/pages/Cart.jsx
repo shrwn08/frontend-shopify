@@ -5,21 +5,19 @@ import {
   getCartItems,
   increaseQuantityItem,
   localUpdateQuantity,
-  removeProductFromCart, 
+  removeProductFromCart,
 } from "../redux/slices/cartSlice";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 const Cart = () => {
   const dispatch = useDispatch();
   const { cart, loading, error } = useSelector((state) => state.cart);
- 
 
   useEffect(() => {
     dispatch(getCartItems());
   }, [dispatch]);
-
-  
 
   if (!cart || cart.length === 0)
     return (
@@ -31,8 +29,7 @@ const Cart = () => {
   if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 
   const handleQuantityIncrement = (id) => {
-
-     dispatch(localUpdateQuantity({ id, change: +1 }));
+    dispatch(localUpdateQuantity({ id, change: +1 }));
 
     const debouncing = () => {
       setTimeout(() => {
@@ -43,16 +40,16 @@ const Cart = () => {
   };
 
   const handleQuantityDecrement = (id) => {
-     dispatch(localUpdateQuantity({ id, change: -1 }));
+    dispatch(localUpdateQuantity({ id, change: -1 }));
 
-      setTimeout(() => {
+    setTimeout(() => {
       dispatch(decreaseQuantityItem({ id }));
     }, 1000);
   };
 
-  function handleRemoveButton (id){
-    dispatch(removeProductFromCart({id}))
-dispatch(getCartItems());
+  function handleRemoveButton(id) {
+    dispatch(removeProductFromCart({ id }));
+    dispatch(getCartItems());
   }
   // Map structure from DB (productId contains details)
 
@@ -61,9 +58,9 @@ dispatch(getCartItems());
   //   quantity: item.quantity,
   // }));
 
- const total = Array.isArray(cart)
-  ? cart.reduce((acc, item) => acc + item.productId.price * item.quantity, 0)
-  : 0;
+  const total = Array.isArray(cart)
+    ? cart.reduce((acc, item) => acc + item.productId.price * item.quantity, 0)
+    : 0;
 
   return (
     <section className="relative w-full min-h-screen flex flex-col md:flex-row justify-between bg-[#F7FAFC] py-10 px-4 md:px-10">
@@ -72,65 +69,66 @@ dispatch(getCartItems());
         <h1 className="text-2xl font-bold text-[#2B6CB0] mb-6">Your Cart</h1>
 
         <div className="flex flex-col gap-6">
-          {Array.isArray(cart) && cart.map((product) => (
-            <div
-              key={product._id}
-              className="flex flex-col sm:flex-row items-center justify-between border-b pb-4"
-            >
-              {/* Product Image & Details */}
-              <div className="flex items-center gap-4">
-                <img
-                  src={product.productId.thumbnail}
-                  alt={product.productId.name}
-                  className="w-24 h-24 object-cover rounded-md shadow-sm"
-                />
-                <div>
-                  <p className="text-lg font-semibold text-[#1A202C]">
-                    {product.productId.name.substring(0, 15)}...
+          {Array.isArray(cart) &&
+            cart.map((product) => (
+              <div
+                key={product._id}
+                className="flex flex-col sm:flex-row items-center justify-between border-b pb-4"
+              >
+                {/* Product Image & Details */}
+                <div className="flex items-center gap-4">
+                  <img
+                    src={product.productId.thumbnail}
+                    alt={product.productId.name}
+                    className="w-24 h-24 object-cover rounded-md shadow-sm"
+                  />
+                  <div>
+                    <p className="text-lg font-semibold text-[#1A202C]">
+                      {product.productId.name.substring(0, 15)}...
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      ₹{product.productId.price.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quantity Controls */}
+                <div className="flex items-center gap-4 mt-3 sm:mt-0">
+                  <button
+                    type="button"
+                    className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+                    onClick={() => handleQuantityDecrement(product._id)}
+                  >
+                    <FaMinus className="text-[#2B6CB0]" />
+                  </button>
+                  <span className="text-lg font-semibold">
+                    {product.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+                    onClick={() => handleQuantityIncrement(product._id)}
+                  >
+                    <FaPlus className="text-[#2B6CB0]" />
+                  </button>
+                </div>
+
+                {/* Subtotal */}
+                <div className="flex flex-col justify-center items-center">
+                  <p className="text-lg font-bold text-[#F57C00] mt-3 sm:mt-0">
+                    ₹{(product.productId.price * product.quantity).toFixed(2)}
                   </p>
-                  <p className="text-sm text-gray-600">
-                    ₹{product.productId.price.toFixed(2)}
-                  </p>
+                  <button
+                    type="button"
+                    className="h-10 w-20 mt-2 text-red-500 hover:text-red-700 transition"
+                    title="Remove from cart"
+                    onClick={() => handleRemoveButton(product._id)}
+                  >
+                    <MdDelete size={22} />
+                  </button>
                 </div>
               </div>
-
-              {/* Quantity Controls */}
-              <div className="flex items-center gap-4 mt-3 sm:mt-0">
-                <button
-                  type="button"
-                  className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
-                  onClick={() => handleQuantityDecrement(product._id)}
-                >
-                  <FaMinus className="text-[#2B6CB0]" />
-                </button>
-                <span className="text-lg font-semibold">
-                  {product.quantity}
-                </span>
-                <button
-                  type="button"
-                  className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
-                  onClick={() => handleQuantityIncrement(product._id)}
-                >
-                  <FaPlus className="text-[#2B6CB0]" />
-                </button>
-              </div>
-
-              {/* Subtotal */}
-              <div className="flex flex-col justify-center items-center">
-                <p className="text-lg font-bold text-[#F57C00] mt-3 sm:mt-0">
-                  ₹{(product.productId.price * product.quantity).toFixed(2)}
-                </p>
-                <button
-                  type="button"
-                  className="h-10 w-20 mt-2 text-red-500 hover:text-red-700 transition"
-                  title="Remove from cart"
-                  onClick={()=>handleRemoveButton(product._id)}
-                >
-                  <MdDelete size={22} />
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 
@@ -160,12 +158,14 @@ dispatch(getCartItems());
         </div>
 
         {/* Checkout Button */}
-        <button
-          type="button"
-          className="mt-6 w-full bg-[#2B6CB0] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#1E3A8A] transition-colors duration-200"
-        >
-          Proceed to Checkout
-        </button>
+        <Link to="/checkout">
+          <button
+            type="button"
+            className="mt-6 w-full bg-[#2B6CB0] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#1E3A8A] transition-colors duration-200"
+          >
+            Proceed to Checkout
+          </button>
+        </Link>
       </div>
     </section>
   );

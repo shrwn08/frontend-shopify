@@ -2,6 +2,7 @@ import React from "react";
 import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../Layout/Layout.jsx";
+import Checkout from "../pages/Checkout.jsx";
 
 const Login = lazy(() => import("../pages/Login.jsx"));
 const Register = lazy(() => import("../pages/Register.jsx"));
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         path : "/cart",
         element : <Cart />
+      },
+      {
+        path : "/checkout",
+        element:<Checkout />
       }
     ],
   },

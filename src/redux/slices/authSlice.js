@@ -52,6 +52,19 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+export const updateAddress = createAsyncThunk(
+  "updateAddress",
+  async (address, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put("/auth/update-address", { address });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
+
 const authSlice = createSlice({
   name: "user",
   initialState,
@@ -105,6 +118,22 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
+
+      //update address
+
+      builder
+      .addCase(updateAddress.pending, (state)=>{
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateAddress.fulfilled,(state,action)=>{
+        state.loading = false;
+        state.token = action.payload;
+      })
+      .addCase(updateAddress.rejected, (state,action)=>{
+        state.loading = false;
+        state.error = action.payload;
+      })
   },
 });
 
