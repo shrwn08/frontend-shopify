@@ -18,6 +18,8 @@ function ProductList() {
 
   }, [dispatch]);
 
+  console.log(products)
+
 
   const handleAddToCartBtn = (id) =>{
    
