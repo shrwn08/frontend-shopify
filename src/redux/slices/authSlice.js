@@ -5,6 +5,7 @@ const token = localStorage.getItem("token");
 
 const initialState = {
   token: token || null,
+  user: null,
   loading: false,
   error: null,
   successMessage: null,
@@ -73,6 +74,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
+       state.isAuthenticated = false;
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     },
@@ -85,6 +87,10 @@ const authSlice = createSlice({
          axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       }
     },
+    clearMessages: (state) => {
+      state.error = null;
+      state.successMessage = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -95,11 +101,13 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.successMessage = action.payload.message;
+        state.successMessage =  typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.message || "Registration successful";
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload?.error || action.payload || "Registration failed";
       });
 
     //login user
@@ -112,11 +120,15 @@ const authSlice = createSlice({
         state.loading = false;
         state.token = action.payload.token;
         state.isAuthenticated = true;
-        state.successMessage = action.payload.message;
+        state.successMessage = typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.message || "Login successful";
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.error || action.payload?.message || "Login failed";
       });
 
       //update address
@@ -128,14 +140,19 @@ const authSlice = createSlice({
       })
       .addCase(updateAddress.fulfilled,(state,action)=>{
         state.loading = false;
-        state.token = action.payload;
+        state.user = action.payload.user;
+        state.successMessage = typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.message || "Address updated successfully";
       })
       .addCase(updateAddress.rejected, (state,action)=>{
         state.loading = false;
-        state.error = action.payload;
+        state.error =  typeof action.payload === "string"
+            ? action.payload
+            : action.payload?.error || action.payload?.message || "Failed to update address";
       })
   },
 });
 
-export const { logout, loadUserFromStorage } = authSlice.actions;
+export const { logout, loadUserFromStorage, clearMessages } = authSlice.actions;
 export default authSlice.reducer;

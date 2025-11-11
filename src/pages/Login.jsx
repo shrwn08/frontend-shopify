@@ -1,16 +1,38 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useDispatch } from "react-redux";
-import { loginUser } from "../redux/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, clearMessages } from "../redux/slices/authSlice";
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import Toast from "../components/Toast";
 
 const Login = () => {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [visiblePass, setVisiblePass] = useState(false);
+   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
+  const { successMessage, error } = useSelector((state) => state.auth);
+
+
+  useEffect(() => {
+    if (successMessage) {
+      setToast({ message: successMessage, type: "success" });
+      setTimeout(() => {
+        dispatch(clearMessages());
+        navigate("/");
+      }, 1500);
+    }
+  }, [successMessage, dispatch, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      setToast({ message: error, type: "error" });
+      setTimeout(() => dispatch(clearMessages()), 3000);
+    }
+  }, [error, dispatch]);
 
   const handleVisiblePassword = () => {
     setVisiblePass((prev) => !prev);
@@ -19,6 +41,11 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    if (!user.trim() || !password.trim()) {
+      setToast({ message: "Please fill in all fields", type: "error" });
+      return;
+    }
+
     const formData = user.includes("@")
       ? { email: user, password: password }
       : { username: user, password: password };
@@ -26,12 +53,19 @@ const Login = () => {
     dispatch(loginUser(formData));
 
     setPassword("");
-    setUser("");
-    navigate("/");
+   
   };
 
   return (
-  <section className="w-full min-h-screen bg-[#F7FAFC] flex justify-center items-center py-10 px-4">
+  <>
+  {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+    <section className="w-full min-h-screen bg-[#F7FAFC] flex justify-center items-center py-10 px-4">
   <form
     onSubmit={handleSubmit}
     className="w-full max-w-sm bg-white rounded-2xl shadow-lg border border-gray-200 px-6 py-8"
@@ -94,6 +128,7 @@ const Login = () => {
     </div>
   </form>
 </section>
+  </>
 
   );
 };

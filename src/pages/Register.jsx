@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useDispatch } from "react-redux";
-import { registerUser } from "../redux/slices/authSlice";
-import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser, clearMessages } from "../redux/slices/authSlice";
+import { Link, useNavigate } from "react-router-dom";
+import Toast from "../components/Toast";
+import { useEffect } from "react";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +16,20 @@ const Register = () => {
   const [repassword, setRepassword] = useState("");
   const [visiblePass, setVisiblePass] = useState(false);
   const [visibleRepass, setVisibleRepass] = useState(false);
+   const [toast, setToast] = useState(null);
   const dispatch = useDispatch();
+   const navigate = useNavigate();
+  const { successMessage } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (successMessage) {
+      setToast({ message: successMessage, type: "success" });
+      setTimeout(() => {
+        dispatch(clearMessages());
+        navigate("/login");
+      }, 2000);
+    }
+  }, [successMessage, dispatch, navigate]);
 
   const handleVisiblePassword = () => {
     setVisiblePass((prev) => !prev);
@@ -31,9 +46,20 @@ const Register = () => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    if(formData.password !== repassword){
-        alert("Passwords are not matching");
+
+    if (!formData.username.trim() || !formData.email.trim() || !formData.password.trim()) {
+      setToast({ message: "Please fill in all fields", type: "error" });
+      return;
     }
+    if(formData.password !== repassword){
+         setToast({ message: "Passwords do not match", type: "error" });
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setToast({ message: "Password must be at least 6 characters", type: "error" });
+      return;
+    } 
     dispatch(registerUser(formData));
     setFormData({
         username : "",
@@ -44,7 +70,15 @@ const Register = () => {
   };
 
   return (
-<section className="w-full min-h-screen bg-[#F7FAFC] flex justify-center items-center py-10 px-4">
+<>
+ {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+  <section className="w-full min-h-screen bg-[#F7FAFC] flex justify-center items-center py-10 px-4">
   <form
     onSubmit={handleSubmit}
     className="w-full max-w-sm bg-white rounded-2xl shadow-lg border border-gray-200 px-6 py-8"
@@ -132,6 +166,7 @@ const Register = () => {
     </p>
   </form>
 </section>
+</>
 
   );
 };

@@ -14,7 +14,9 @@ export const getCartItems = createAsyncThunk(
     try {
       const response = await axiosInstance.get("/cart");
       // console.log(response.data)
-      return Array.isArray(response.data) ? response.data : response.data.cartItems;
+      return Array.isArray(response.data)
+        ? response.data
+        : response.data.cartItems;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -36,13 +38,13 @@ export const addingToCart = createAsyncThunk(
   }
 );
 
-export const increaseQuantityItem = createAsyncThunk(
-  "increaseQuantityItem",
-  async ({ id }, { rejectWithValue }) => {
+export const updateQuantityItem = createAsyncThunk(
+  "updateQuantityItem",
+  async ({ id, quantity }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.put(
-        "/increase_quantity",
-        { id },
+        "/update_quantity",
+        { id, quantity },
         {
           headers: {
             "Content-Type": "application/json",
@@ -57,39 +59,27 @@ export const increaseQuantityItem = createAsyncThunk(
   }
 );
 
-export const decreaseQuantityItem = createAsyncThunk(
-  "decreaseQuantityItem",
-  async ({ id }, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.put(
-        "/decrease_quantity",
-        { id },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response?.data || error.message);
-    }
-  }
-);
 
 export const removeProductFromCart = createAsyncThunk(
   "removeProductFromCart",
-  async ({id},{rejectWithValue}) => {
+  async ({ id }, { rejectWithValue }) => {
     try {
-        const response = await axiosInstance.delete(`/add_to_cart/${id}`)
-        return response.data;
+       await axiosInstance.delete(`/remove/${id}`);
+      return id;
     } catch (error) {
-
-        return rejectWithValue(error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
 
+export const placeOrder = createAsyncThunk("placeOrder", async (_,{rejectWithValue})=>{
+   try {
+      const response = await axiosInstance.delete(`/orderplaced`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+})
 const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -99,6 +89,9 @@ const cartSlice = createSlice({
     },
     clearCartError: (state) => {
       state.error = null;
+    },
+    clearCart : (state)=>{
+      state.cart = [];
     },
     localUpdateQuantity: (state, action) => {
       const { id, change } = action.payload;
@@ -140,20 +133,21 @@ const cartSlice = createSlice({
         state.error = action.payload;
       });
 
-    //increaseQuantityItem
+    //updateQuantityItem
     builder
-      .addCase(increaseQuantityItem.pending, (state) => {
+      .addCase(updateQuantityItem.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(increaseQuantityItem.fulfilled, (state, action) => {
+      .addCase(updateQuantityItem.fulfilled, (state, action) => {
         state.loading = false;
-        const updated = action.payload.data || action.payload;
-        state.cart = state.cart.map((item) =>
-          item._id === updated._id ? updated : item
-        );
+        state.cart = Array.isArray(action.payload)
+          ? action.payload
+          : state.cart.map((item) =>
+              item._id === action.payload._id ? action.payload : item
+            );
       })
-      .addCase(increaseQuantityItem.rejected, (state, action) => {
+      .addCase(updateQuantityItem.rejected, (state, action) => {
         state.loading = false;
 
         state.error = state.error =
@@ -161,41 +155,40 @@ const cartSlice = createSlice({
             ? action.payload
             : action.payload?.error || "Failed to increase quantity";
       });
-    /// decreaseQuantityItem
+
+    //remove button functionality
     builder
-      .addCase(decreaseQuantityItem.pending, (state) => {
-        state.error = null;
+      .addCase(removeProductFromCart.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
-      .addCase(decreaseQuantityItem.fulfilled, (state, action) => {
+      .addCase(removeProductFromCart.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = state.cart.map((item) =>
-          item._id === action.payload._id ? action.payload : item
-        );
+        state.cart = state.cart.filter((item) => item._id !== action.payload);
+        state.message = "Item removed from cart";
       })
-      .addCase(decreaseQuantityItem.rejected, (state, action) => {
+      .addCase(removeProductFromCart.rejected, (state, action) => {
         state.loading = false;
-        state.error =
-          typeof action.payload === "string"
-            ? action.payload
-            : action.payload?.error || "Failed to decrease quantity";
+        state.error =action.payload?.error || action.payload || "Failed to remove item";
       });
 
-      //remove button functionality
-      builder.addCase(removeProductFromCart.pending, (state)=>{
-            state.loading = true;
-            state.error = null;
+      //place order
+      builder
+      .addCase(placeOrder.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(removeProductFromCart.fulfilled, (state,action)=>{
-        state.loading = false;
-        state.cart = action.payload;
+      .addCase(placeOrder.fulfilled, (state, action) => {
+         state.loading = false;
+  state.cart = [];
+  state.message = action.payload.message;
       })
-      .addCase(removeProductFromCart.rejected,(state,action)=>{
+      .addCase(placeOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
+      });
   },
 });
-export const { clearCartMessage, clearCartError, localUpdateQuantity } =
+export const { clearCartMessage, clearCartError, localUpdateQuantity, clearCart } =
   cartSlice.actions;
 export default cartSlice.reducer;
