@@ -1,182 +1,212 @@
-import React  from "react";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearProducts, getProducts } from "../redux/slices/productSlice";
 import { Link } from "react-router-dom";
 import Hero from "../components/Hero.jsx";
-import { addingToCart } from "../redux/slices/cartSlice.js";
+import FilterBar from "../components/FilterBar.jsx";
+import CategorySidebar from "../components/CategorySidebar.jsx";
+import SearchResults from "../components/SearchResults.jsx";
+import {
+  addingToCart,
+  clearCartMessage,
+  clearCartError,
+} from "../redux/slices/cartSlice.js";
+import Toast from "../components/Toast";
 
 function ProductList() {
-  const { products, loading, error } = useSelector((state) => state.products);
+  const { filteredProducts, loading, error } = useSelector(
+    (state) => state.products
+  );
+  const { message: cartMessage, error: cartError } = useSelector(
+    (state) => state.cart
+  );
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
-  dispatch(getProducts());
-    return ()=>(
-      dispatch(clearProducts())
-    );
-
+    dispatch(getProducts());
+    return () => {
+      dispatch(clearProducts());
+    };
   }, [dispatch]);
 
-  console.log(products)
+  useEffect(() => {
+    if (cartMessage) {
+      const safeMessage =
+        typeof cartMessage === "string"
+          ? cartMessage
+          : cartMessage?.message || "Success";
+      setToast({ message: safeMessage, type: "success" });
+      setTimeout(() => dispatch(clearCartMessage()), 3000);
+    }
+  }, [cartMessage, dispatch]);
 
+  useEffect(() => {
+    if (cartError) {
+      const safeError =
+        typeof cartError === "string"
+          ? cartError
+          : cartError?.error || cartError?.message || "An error occurred";
+      setToast({ message: safeError, type: "error" });
+      setTimeout(() => dispatch(clearCartError()), 3000);
+    }
+  }, [cartError, dispatch]);
 
-  const handleAddToCartBtn = (id) =>{
-   
-    
-    dispatch(addingToCart({productId : id,quantity : 1}));
- 
-  }
+  const handleAddToCartBtn = (id) => {
+    if (!isAuthenticated) {
+      setToast({
+        message: "Please login to add items to cart",
+        type: "error",
+      });
+      return;
+    }
+    dispatch(addingToCart({ productId: id, quantity: 1 }));
+  };
 
-  if (loading) return <p>loading... </p>;
-  if (error) return <p>{error.message}</p>;
+  if (loading)
+    return <p className="text-center mt-32 text-lg">Loading...</p>;
+  if (error)
+    return <p className="text-center mt-32 text-red-500">{error}</p>;
 
- 
-//   return (
-// <section className="w-full min-h-screen bg-[#F7FAFC] flex flex-col items-center">
-//   {/* --- Hero Section --- */}
-//   <div className="w-full mb-20">
-//     <Hero />
-//   </div>
+  return (
+    <>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      <section className="w-full min-h-screen bg-gradient-to-b from-[#F8FAFC] to-[#EEF2FF]">
+        {/* Hero */}
+        <div className="w-full mb-10 mt-20">
+          <Hero />
+        </div>
 
-//   {/* --- Product List --- */}
-//   <div className="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
-//     {products.map((product) => (
-//       <div
-//         key={product._id}
-//         className="relative bg-white shadow-md rounded-xl overflow-hidden hover:shadow-xl transition-shadow duration-300"
-//       >
-//         {/* Stock Badge */}
-//         <p
-//           className={`absolute top-2 left-2 ${
-//             product.stock > 0 ? "bg-[#2B6CB0]" : "bg-gray-400"
-//           } text-white text-xs font-medium px-2 py-1 rounded-md`}
-//         >
-//           {product.stock > 0 ? `In Stock: ${product.stock}` : "Out of Stock"}
-//         </p>
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Filter Bar */}
+          <FilterBar />
 
-//         {/* Product Image */}
-//         <Link to={`/product/${product._id}`} className="block">
-//           <img 
-//             loading="lazy"
-//             src={product.thumbnail}
-//             alt={product.name}
-//             className="w-full h-56 object-cover hover:scale-105 transition-transform duration-300"
-//           />
-//         </Link>
+          {/* Search Results Info */}
+          <SearchResults />
 
-//         {/* Product Info */}
-//         <div className="p-4">
-//           <p className="text-lg font-semibold text-[#1A202C] truncate">
-//             {product.name}
-//           </p>
-//           <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-//             {product.description.slice(0, 50)}...
-//           </p>
+          {/* Main Content with Sidebar */}
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Category Sidebar - Desktop */}
+            <aside className="hidden lg:block lg:w-64">
+              <CategorySidebar />
+            </aside>
 
-//           {/* Price & Rating */}
-//           <div className="flex justify-between items-center mt-3">
-//             <p className="text-lg font-bold text-[#F57C00]">
-//               ₹{product.price.toFixed(2)}
-//             </p>
-//             <p className="text-sm text-yellow-500 font-medium">
-//               ⭐ {product.rating ?? "N/A"}
-//             </p>
-//           </div>
+            {/* Products Grid */}
+            <div className="flex-1">
+              {filteredProducts.length === 0 ? (
+                <div className="w-full py-20 text-center bg-white rounded-lg shadow-sm">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png"
+                    alt="No results"
+                    className="w-32 h-32 mx-auto mb-4 opacity-50"
+                  />
+                  <p className="text-2xl text-gray-500 font-semibold">
+                    No products found
+                  </p>
+                  <p className="text-gray-400 mt-2">
+                    Try adjusting your filters or search terms
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 pb-20">
+                  {filteredProducts.map((product) => {
+                    // CRITICAL FIX: Safely get category with fallback
+                    const categoryName = product?.category || "general";
+                    const displayCategory = categoryName
+                      .replace(/-/g, " ")
+                      .replace(/_/g, " ");
 
-//           {/* Add to Cart Button */}
-//         <button
-//             type="button"
-//             onClick={()=>handleAddToCartBtn(product._id)}
-//             className="w-full mt-4 bg-[#2B6CB0] text-white font-semibold py-2 rounded-md hover:bg-[#1E3A8A] transition-colors duration-200 disabled:bg-gray-400 hover:cursor-pointer"
-//             disabled={product.stock === 0}
-//           >
-//             {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-//           </button>
-          
-//         </div>
-//       </div>
-//     ))}
-//   </div>
-// </section>
+                    return (
+                      <div
+                        key={product._id}
+                        className="relative bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                      >
+                        {/* Stock Badge */}
+                        <p
+                          className={`absolute top-3 left-3 px-3 py-1 text-xs font-semibold rounded-full shadow-sm z-10 ${
+                            product.stock > 0
+                              ? "bg-green-600 text-white"
+                              : "bg-gray-400 text-white"
+                          }`}
+                        >
+                          {product.stock > 0
+                            ? `Stock: ${product.stock}`
+                            : "Out of Stock"}
+                        </p>
 
+                        {/* Category Badge - COMPLETELY SAFE */}
+                        <p className="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full z-10 capitalize">
+                          {displayCategory}
+                        </p>
 
-//   );
+                        {/* Image */}
+                        <Link
+                          to={`/product/${product._id}`}
+                          className="block group"
+                        >
+                          <img
+                            loading="lazy"
+                            src={product.thumbnail || "https://via.placeholder.com/150"}
+                            alt={product.name || "Product"}
+                            className="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </Link>
 
-return (
-    <section className="w-full min-h-screen bg-gradient-to-b from-[#F8FAFC] to-[#EEF2FF] flex flex-col items-center">
-      {/* Hero */}
-      <div className="w-full mb-16">
-        <Hero />
-      </div>
+                        {/* Info */}
+                        <div className="p-5">
+                          <h3 className="text-lg font-semibold text-gray-800 truncate mb-2">
+                            {product.name || "Unknown Product"}
+                          </h3>
+                          <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                            {product.description || "No description available"}
+                          </p>
 
-      {/* Product Grid */}
-      <div className="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-6 pb-20">
-        {products.map((product) => (
-          <div
-            key={product._id}
-            className="relative bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-          >
-            {/* Stock Badge */}
-            <p
-              className={`absolute top-3 left-3 px-3 py-1 text-xs font-semibold rounded-full shadow-sm ${
-                product.stock > 0
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-400 text-white"
-              }`}
-            >
-              {product.stock > 0 ? `In Stock: ${product.stock}` : "Out of Stock"}
-            </p>
+                          <div className="flex justify-between items-center mb-4">
+                            <p className="text-xl font-bold text-[#F97316]">
+                              ₹{(product.price || 0).toFixed(2)}
+                            </p>
+                            <p className="text-sm font-medium text-yellow-500">
+                              ⭐ {product.rating?.toFixed(1) || "N/A"}
+                            </p>
+                          </div>
 
-            {/* Image */}
-            <Link to={`/product/${product._id}`} className="block group">
-              <img
-                loading="lazy"
-                src={product.thumbnail}
-                alt={product.name}
-                className="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </Link>
-
-            {/* Info */}
-            <div className="p-5 flex flex-col justify-between h-48">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 truncate">
-                  {product.name}
-                </h3>
-                <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                  {product.description.slice(0, 60)}...
-                </p>
-              </div>
-
-              {/* Price + Rating */}
-              <div className="flex justify-between items-center mt-3">
-                <p className="text-lg font-bold text-[#F97316]">
-                  ₹{product.price.toFixed(2)}
-                </p>
-                <p className="text-sm font-medium text-yellow-500">
-                  ⭐ {product.rating ?? "N/A"}
-                </p>
-              </div>
-
-              {/* Add to Cart */}
-              <button
-                type="button"
-                onClick={() => handleAddToCartBtn(product._id)}
-                disabled={product.stock === 0}
-                className={`mt-4 w-full py-2 rounded-md font-semibold text-white transition-all duration-300 ${
-                  product.stock === 0
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg"
-                }`}
-              >
-                {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
-              </button>
+                          <button
+                            type="button"
+                            onClick={() => handleAddToCartBtn(product._id)}
+                            disabled={product.stock === 0}
+                            className={`w-full py-2 rounded-md font-semibold text-white transition-all duration-300 ${
+                              product.stock === 0
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg"
+                            }`}
+                          >
+                            {product.stock === 0
+                              ? "Out of Stock"
+                              : "Add to Cart"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
-        ))}
-      </div>
-    </section>
+
+          {/* Mobile Category Filter */}
+          <div className="lg:hidden mb-6">
+            <CategorySidebar />
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
 
